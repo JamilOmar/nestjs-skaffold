@@ -1,0 +1,61 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress	
+metadata:	
+  name: node-demo
+  annotations:	
+    kubernetes.io/ingress.class: "nginx"	
+    ingress.kubernetes.io/ssl-redirect: "false"	
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"	
+spec:	
+  rules:	
+  - http:	
+      paths:	
+      - path: /api
+        pathType: ImplementationSpecific
+        backend:	
+          service:
+            name: node-demo-api
+            port:
+              number: 8080
+
+---	
+apiVersion: apps/v1
+kind: Deployment	
+metadata:	
+  name: node-demo-api
+spec:	
+  replicas: 1	
+  selector:	
+    matchLabels:	
+      type: api	
+      service: node-demo	
+  template:	
+    metadata:	
+      labels:	
+        type: api	
+        service: node-demo
+        language: node	
+    spec:	
+      containers:	
+      - name: api	
+        image: jamilomar/test
+        env:
+        - name: PORT
+          value: "8080"
+        - name: PREFIX
+          value: api
+---	
+
+apiVersion: v1	
+kind: Service	
+metadata:	
+  name: node-demo-api
+spec:
+  ports:	
+  - port: 8080
+  selector:	
+    type: api
+    service: node-demo
+
+
+
